@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSINAMO</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.0/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { vazir: ['Vazirmatn', 'sans-serif'] },
+                    colors: {
+                        primary: '#6366f1', // Indigo
+                        secondary: '#d946ef', // Fuchsia
+                        darkbg: '#030712', // Gray 950
+                        panel: 'rgba(17, 24, 39, 0.75)', // Gray 900 with opacity
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #030712;
+            color: #f8fafc;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+        /* Premium Glassmorphism */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #818cf8, #e879f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .glow-effect:hover {
+            box-shadow: 0 0 30px rgba(217, 70, 239, 0.5);
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Chat bubbles */
+        .chat-bubble-user { background: linear-gradient(135deg, #4f46e5, #6366f1); border-radius: 16px 16px 0 16px; }
+        .chat-bubble-admin { background: #1e293b; border: 1px solid #334155; border-radius: 16px 16px 16px 0; }
+    </style>
+</head>
+<body class="antialiased relative min-h-screen flex flex-col">
+
+    <div class="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-secondary/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob" style="animation-delay: 2s;"></div>
+        <div class="absolute top-[40%] left-[40%] w-[400px] h-[400px] bg-purple-500/10 rounded-full mix-blend-screen filter blur-[100px] animate-blob" style="animation-delay: 4s;"></div>
+    </div>
+
+    <nav class="fixed w-full z-50 top-4 px-4 transition-all duration-300">
+        <div class="glass-panel max-w-6xl mx-auto rounded-2xl px-6 py-4 flex items-center justify-between shadow-2xl">
+            <div class="text-2xl font-black text-gradient tracking-widest cursor-pointer" onclick="switchView('public')">MSINAMO</div>
+            
+            <div class="hidden md:flex items-center space-x-8 space-x-reverse text-sm font-medium text-slate-300">
+                <button onclick="switchView('public')" class="hover:text-white transition-colors">خانه</button>
+                <a href="#projects" class="hover:text-white transition-colors">پروژه‌ها</a>
+                <a href="#gallery" class="hover:text-white transition-colors">گالری</a>
+                <a href="#music-section" class="hover:text-white transition-colors">موزیک‌ها</a>
+            </div>
+            
+            <div id="nav-actions" class="flex items-center gap-3">
+                </div>
+        </div>
+    </nav>
+
+    <div id="auth-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300" onclick="closeAuthModal()">
+        <div class="glass-panel w-full max-w-md p-8 rounded-2xl relative transform scale-95 transition-transform duration-300" id="auth-box" onclick="event.stopPropagation()">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            
+            <div class="flex border-b border-slate-700 mb-6 pb-2">
+                <button onclick="toggleAuthMode('login')" id="tab-login" class="flex-1 text-center font-bold text-primary border-b-2 border-primary pb-2">ورود</button>
+                <button onclick="toggleAuthMode('register')" id="tab-register" class="flex-1 text-center font-bold text-slate-400 border-b-2 border-transparent pb-2 hover:text-slate-200">ثبت نام</button>
+            </div>
+
+            <div id="form-login" class="space-y-4 block">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">نام کاربری</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute right-3 top-3 text-slate-500"></i>
+                        <input type="text" id="log-username" class="w-full bg-slate-900 border border-slate-700 rounded-xl pr-10 pl-4 py-2.5 text-white outline-none focus:border-primary transition-colors">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">رمز عبور</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute right-3 top-3 text-slate-500"></i>
+                        <input type="password" id="log-password" class="w-full bg-slate-900 border border-slate-700 rounded-xl pr-10 pl-4 py-2.5 text-white outline-none focus:border-primary transition-colors">
+                    </div>
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all transform hover:-translate-y-0.5 mt-2">وارد شوید</button>
+            </div>
+
+            <div id="form-register" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">نام کاربری دلخواه</label>
+                    <div class="relative">
+                        <i class="fas fa-user-plus absolute right-3 top-3 text-slate-500"></i>
+                        <input type="text" id="reg-username" class="w-full bg-slate-900 border border-slate-700 rounded-xl pr-10 pl-4 py-2.5 text-white outline-none focus:border-primary transition-colors">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">رمز عبور</label>
+                    <div class="relative">
+                        <i class="fas fa-key absolute right-3 top-3 text-slate-500"></i>
+                        <input type="password" id="reg-password" class="w-full bg-slate-900 border border-slate-700 rounded-xl pr-10 pl-4 py-2.5 text-white outline-none focus:border-primary transition-colors">
+                    </div>
+                </div>
+                <button onclick="handleRegister()" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all transform hover:-translate-y-0.5 mt-2">ساخت حساب</button>
+            </div>
+            
+            <p id="auth-error" class="text-red-400 text-sm mt-4 text-center hidden"></p>
+        </div>
+    </div>
+
+    <div id="public-view" class="block w-full flex-1">
+        
+        <section id="home" class="min-h-[100vh] flex items-center justify-center pt-24 px-4 relative">
+            <div class="max-w-4xl mx-auto text-center flex flex-col items-center">
+                <div class="relative w-44 h-44 md:w-56 md:h-56 mb-8 fade-in group" style="animation-delay: 0.1s;">
+                    <div class="absolute inset-[-4px] bg-gradient-to-tr from-primary via-purple-500 to-secondary rounded-full animate-spin glow-effect" style="animation-duration: 4s; filter: blur(10px); opacity: 0.7;"></div>
+                    <img id="render-profile-img" src="" alt="Profile" class="relative w-full h-full object-cover rounded-full border-4 border-slate-900 shadow-2xl z-10 bg-slate-800 transition-transform duration-500 group-hover:scale-105">
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl font-black mb-4 fade-in tracking-tight" style="animation-delay: 0.2s;">
+                    سلام، من <span id="render-profile-name" class="text-gradient drop-shadow-lg"></span> هستم
+                </h1>
+                <h2 id="render-profile-title" class="text-xl md:text-3xl text-slate-300 mb-8 font-light fade-in tracking-wide" style="animation-delay: 0.3s;"></h2>
+                <p id="render-profile-bio" class="max-w-3xl text-slate-400 mb-10 text-lg leading-relaxed fade-in" style="animation-delay: 0.4s;"></p>
+                
+                <div id="render-socials" class="flex flex-wrap justify-center gap-4 fade-in" style="animation-delay: 0.5s;">
+                    </div>
+            </div>
+        </section>
+
+        <section id="skills" class="py-24 px-4 relative">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col items-center mb-16 fade-in">
+                    <h2 class="text-4xl font-bold text-white mb-4">تخصص و مهارت‌ها</h2>
+                    <div class="w-24 h-1.5 bg-gradient-to-r from-primary to-secondary rounded-full glow-effect"></div>
+                </div>
+                <div id="render-skills" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+        </section>
+
+        <section id="projects" class="py-24 px-4 relative bg-slate-900/40 border-y border-white/5">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col items-center mb-16">
+                    <h2 class="text-4xl font-bold text-white mb-4">نمونه کارها</h2>
+                    <div class="w-24 h-1.5 bg-gradient-to-r from-primary to-secondary rounded-full glow-effect"></div>
+                </div>
+                <div id="render-projects" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </div>
+        </section>
+
+        <section id="gallery" class="py-24 px-4 relative">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col items-center mb-16">
+                    <h2 class="text-4xl font-bold text-white mb-4">گالری تصاویر</h2>
+                    <div class="w-24 h-1.5 bg-gradient-to-r from-primary to-secondary rounded-full glow-effect"></div>
+                </div>
+                <div id="render-gallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+            </div>
+        </section>
+
+        <section id="music-section" class="py-24 px-4 relative bg-slate-900/40 border-t border-white/5">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col items-center mb-16">
+                    <h2 class="text-4xl font-bold text-white mb-4">موزیک‌های من</h2>
+                    <div class="w-24 h-1.5 bg-gradient-to-r from-primary to-secondary rounded-full glow-effect"></div>
+                </div>
+                <div id="render-music" class="space-y-4 max-w-4xl mx-auto"></div>
+            </div>
+        </section>
+        
+        <footer class="py-10 text-center border-t border-white/5 text-slate-500 bg-black/50 backdrop-blur">
+            <p class="font-medium tracking-wide">© 2026 <span class="text-primary">MSINAMO</span>. طراحی شده با عشق و کد.</p>
+        </footer>
+    </div>
+
+    <div id="lightbox" class="fixed inset-0 z-[110] bg-black/95 hidden flex-col items-center justify-center p-4 transition-opacity duration-300 opacity-0 backdrop-blur-md" onclick="closeLightbox()">
+        <button class="absolute top-6 right-6 text-white/50 hover:text-white text-5xl focus:outline-none z-50 transition-colors"><i class="fas fa-times"></i></button>
+        <img id="lightbox-img" src="" class="max-w-full max-h-[90vh] rounded-xl shadow-2xl transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+    </div>
+
+    <div id="user-chat-widget" class="fixed bottom-6 left-6 z-40 hidden flex-col transition-all duration-300">
+        <div id="user-chat-box" class="glass-panel w-[350px] h-[450px] rounded-2xl mb-4 hidden flex-col overflow-hidden shadow-2xl border border-primary/20 transform scale-95 opacity-0 transition-all origin-bottom-left">
+            <div class="bg-gradient-to-r from-primary to-secondary p-4 flex items-center justify-between text-white shadow-md z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30">
+                        <img id="chat-header-img" src="" class="w-full h-full object-cover bg-slate-800">
+                    </div>
+                    <div>
+                        <h4 class="font-bold">گفتگو با سینا</h4>
+                        <span class="text-xs text-white/80">آنلاین</span>
+                    </div>
+                </div>
+                <button onclick="toggleUserChat()" class="hover:bg-white/20 p-2 rounded-lg transition"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="user-chat-messages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 bg-slate-900/50">
+                <div class="text-center text-xs text-slate-500 my-2">شروع گفتگو</div>
+                </div>
+            
+            <div class="p-3 bg-slate-900 border-t border-slate-700/50 flex items-center gap-2">
+                <input type="text" id="user-chat-input" placeholder="پیام خود را بنویسید..." class="flex-1 bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-white outline-none focus:border-primary text-sm" onkeypress="if(event.key === 'Enter') sendUserMessage()">
+                <button onclick="sendUserMessage()" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-indigo-500 transition shadow-lg shadow-primary/30 shrink-0">
+                    <i class="fas fa-paper-plane mr-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <button onclick="toggleUserChat()" class="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-secondary text-white text-2xl flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.5)] hover:scale-110 transition-transform">
+            <i class="fas fa-comment-dots"></i>
+        </button>
+    </div>
+
+    <div id="admin-view" class="hidden w-full flex-1 pt-24 px-4 pb-20 bg-slate-950/80 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between mb-8 glass-panel p-4 rounded-2xl">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary text-2xl"><i class="fas fa-shield-alt"></i></div>
+                    <h2 class="text-2xl font-black text-white">پنل مدیریت پیشرفته</h2>
+                </div>
+                <button onclick="switchView('public')" class="bg-slate-800 hover:bg-slate-700 px-5 py-2.5 rounded-xl text-white transition font-medium flex items-center gap-2 border border-slate-600">
+                    <i class="fas fa-arrow-right"></i> مشاهده سایت
+                </button>
+            </div>
+            
+            <div class="flex flex-col lg:flex-row gap-6">
+                <div class="w-full lg:w-1/4 space-y-2 glass-panel p-4 rounded-2xl h-fit sticky top-24">
+                    <button onclick="openTab('tab-profile')" class="admin-tab-btn w-full text-right px-4 py-3.5 rounded-xl bg-primary/20 text-white font-bold transition flex items-center gap-3 border border-primary/30"><i class="fas fa-user text-primary w-5 text-center"></i> اطلاعات پایه</button>
+                    <button onclick="openTab('tab-skills')" class="admin-tab-btn w-full text-right px-4 py-3.5 rounded-xl hover:bg-slate-800/50 text-slate-300 font-medium transition flex items-center gap-3 border border-transparent"><i class="fas fa-code text-slate-400 w-5 text-center"></i> مهارت‌ها</button>
+                    <button onclick="openTab('tab-projects')" class="admin-tab-btn w-full text-right px-4 py-3.5 rounded-xl hover:bg-slate-800/50 text-slate-300 font-medium transition flex items-center gap-3 border border-transparent"><i class="fas fa-briefcase text-slate-400 w-5 text-center"></i> پروژه‌ها</button>
+                    <button onclick="openTab('tab-gallery')" class="admin-tab-btn w-full text-right px-4 py-3.5 rounded-xl hover:bg-slate-800/50 text-slate-300 font-medium transition flex items-center gap-3 border border-transparent"><i class="fas fa-images text-slate-400 w-5 text-center"></i> گالری تصاویر</button>
+                    <button onclick="openTab('tab-music')" class="admin-tab-btn w-full text-right px-4 py-3.5 rounded-xl hover:bg-slate-800/50 text-slate-300 font-medium transition flex items-center gap-3 border border-transparent"><i class="fas fa-music text-slate-400 w-5 text-center"></i> لیست آهنگ‌ها</button>
+                    <button onclick="openTab('tab-socials')" class="admin-tab-btn w-full text-right px-4 py-3.5 rounded-xl hover:bg-slate-800/50 text-slate-300 font-medium transition flex items-center gap-3 border border-transparent"><i class="fas fa-link text-slate-400 w-5 text-center"></i> لینک‌های ارتباطی</button>
+                    <div class="h-px bg-slate-700 my-2"></div>
+                    <button onclick="openTab('tab-messages')" class="admin-tab-btn w-full text-right px-4 py-3.5 rounded-xl hover:bg-slate-800/50 text-slate-300 font-medium transition flex items-center gap-3 border border-transparent relative"><i class="fas fa-comments text-secondary w-5 text-center"></i> چت و پیام‌ها <span class="absolute left-3 top-1/2 transform -translate-y-1/2 bg-secondary text-white text-xs px-2 py-0.5 rounded-full" id="admin-msg-badge">0</span></button>
+                    <button onclick="openTab('tab-users')" class="admin-tab-btn w-full text-right px-4 py-3.5 rounded-xl hover:bg-slate-800/50 text-slate-300 font-medium transition flex items-center gap-3 border border-transparent"><i class="fas fa-users text-green-400 w-5 text-center"></i> لیست کاربران</button>
+                    <button onclick="openTab('tab-settings')" class="admin-tab-btn w-full text-right px-4 py-3.5 rounded-xl hover:bg-slate-800/50 text-slate-300 font-medium transition flex items-center gap-3 border border-transparent"><i class="fas fa-cog text-orange-400 w-5 text-center"></i> تنظیمات ادمین</button>
+                </div>
+
+                <div class="w-full lg:w-3/4 glass-panel p-6 sm:p-8 rounded-2xl min-h-[600px]">
+                    
+                    <div id="tab-profile" class="admin-tab-content block space-y-5 fade-in">
+                        <h3 class="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">ویرایش اطلاعات پایه</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">نام شما</label>
+                                <input type="text" id="inp-name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-primary transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">عنوان تخصصی</label>
+                                <input type="text" id="inp-title" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-primary transition">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-400 mb-2">درباره من</label>
+                                <textarea id="inp-bio" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-primary transition resize-none"></textarea>
+                            </div>
+                            <div class="md:col-span-2 bg-slate-800/50 p-4 rounded-xl border border-slate-700 border-dashed">
+                                <label class="block text-sm font-medium text-slate-300 mb-2">آپلود عکس پروفایل جدید</label>
+                                <input type="file" id="inp-image" accept="image/*" class="w-full text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-primary/20 file:text-primary hover:file:bg-primary/30 transition">
+                            </div>
+                        </div>
+                        <button onclick="saveProfile()" class="bg-primary hover:bg-indigo-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-primary/30 mt-4 flex items-center gap-2"><i class="fas fa-save"></i> ذخیره اطلاعات</button>
+                    </div>
+
+                    <div id="tab-skills" class="admin-tab-content hidden space-y-6 fade-in">
+                        <h3 class="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">مهارت‌ها</h3>
+                        <div class="flex flex-col sm:flex-row gap-4 bg-slate-800/30 p-5 rounded-xl border border-slate-700/50">
+                            <input type="text" id="skill-name" placeholder="نام مهارت (مثال: React)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-primary">
+                            <input type="number" id="skill-percent" placeholder="درصد (0-100)" class="w-full sm:w-32 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-primary" min="0" max="100">
+                            <button onclick="addSkill()" class="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-xl transition font-bold whitespace-nowrap"><i class="fas fa-plus ml-2"></i>افزودن</button>
+                        </div>
+                        <div id="admin-skills-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6"></div>
+                    </div>
+
+                    <div id="tab-projects" class="admin-tab-content hidden space-y-6 fade-in">
+                        <h3 class="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">افزودن پروژه جدید</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-800/30 p-5 rounded-xl border border-slate-700/50">
+                            <input type="text" id="proj-title" placeholder="عنوان پروژه" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
+                            <input type="text" id="proj-link" placeholder="لینک (http://...)" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
+                            <input type="text" id="proj-desc" placeholder="توضیح کوتاه" class="md:col-span-2 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none">
+                            <div class="md:col-span-2 border border-dashed border-slate-600 rounded-xl p-3">
+                                <label class="block text-sm text-slate-400 mb-2">عکس پروژه را انتخاب کنید</label>
+                                <input type="file" id="proj-img" accept="image/*" class="w-full text-sm text-slate-400 file:bg-slate-700 file:text-white file:border-0 file:rounded-lg file:px-4 file:py-2">
+                            </div>
+                            <button onclick="addProject()" class="md:col-span-2 bg-green-500 hover:bg-green-400 text-white py-3 rounded-xl transition font-bold mt-2"><i class="fas fa-plus ml-2"></i>ثبت پروژه</button>
+                        </div>
+                        <div id="admin-projects-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6"></div>
+                    </div>
+
+                    <div id="tab-gallery" class="admin-tab-content hidden space-y-6 fade-in">
+                        <h3 class="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">افزودن به گالری</h3>
+                        <div class="flex flex-col sm:flex-row gap-4 bg-slate-800/30 p-5 rounded-xl border border-slate-700/50">
+                            <input type="file" id="gal-img" accept="image/*" class="flex-1 text-sm text-slate-400 file:bg-slate-700 file:text-white file:border-0 file:rounded-lg file:px-4 file:py-2">
+                            <input type="text" id="gal-title" placeholder="کپشن عکس" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-primary">
+                            <button onclick="addGallery()" class="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-xl transition font-bold"><i class="fas fa-upload ml-2"></i>آپلود</button>
+                        </div>
+                        <div id="admin-gallery-list" class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6"></div>
+                    </div>
+
+                    <div id="tab-music" class="admin-tab-content hidden space-y-6 fade-in">
+                        <h3 class="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">آهنگ‌های سایت</h3>
+                        <div class="flex flex-col md:flex-row gap-4 bg-slate-800/30 p-5 rounded-xl border border-slate-700/50">
+                            <input type="text" id="mus-title" placeholder="نام آهنگ" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-primary">
+                            <input type="file" id="mus-file" accept="audio/*" class="flex-1 text-sm text-slate-400 file:bg-slate-700 file:text-white file:border-0 file:rounded-lg file:px-4 file:py-2">
+                            <button onclick="addMusic()" class="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-xl transition font-bold"><i class="fas fa-plus ml-2"></i>افزودن</button>
+                        </div>
+                        <div id="admin-music-list" class="space-y-3 mt-6"></div>
+                    </div>
+
+                    <div id="tab-socials" class="admin-tab-content hidden space-y-6 fade-in">
+                        <h3 class="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">راه‌های ارتباطی</h3>
+                        <div class="flex flex-col sm:flex-row gap-4 bg-slate-800/30 p-5 rounded-xl border border-slate-700/50">
+                            <select id="soc-platform" class="w-full sm:w-40 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-primary">
+                                <option value="telegram">تلگرام</option>
+                                <option value="instagram">اینستاگرام</option>
+                                <option value="whatsapp">واتس‌اپ</option>
+                                <option value="linkedin">لینکدین</option>
+                                <option value="github">گیت‌هاب</option>
+                                <option value="twitter">توییتر (X)</option>
+                                <option value="rubika">روبیکا</option>
+                                <option value="bale">بله</option>
+                                <option value="eitaa">ایتا</option>
+                                <option value="email">ایمیل</option>
+                            </select>
+                            <input type="text" id="soc-link" placeholder="آیدی یا لینک (https://...)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-primary" dir="ltr">
+                            <button onclick="addSocial()" class="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-xl transition font-bold"><i class="fas fa-plus ml-2"></i>ثبت</button>
+                        </div>
+                        <div id="admin-socials-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6"></div>
+                    </div>
+
+                    <div id="tab-messages" class="admin-tab-content hidden space-y-0 h-full fade-in">
+                        <h3 class="text-2xl font-bold mb-4 text-white border-b border-slate-700/50 pb-4">مدیریت پیام‌های کاربران</h3>
+                        <div class="flex flex-col md:flex-row h-[500px] border border-slate-700/50 rounded-xl overflow-hidden bg-slate-900/50">
+                            <div class="w-full md:w-1/3 border-b md:border-b-0 md:border-l border-slate-700/50 bg-slate-900 overflow-y-auto flex flex-col">
+                                <div class="p-3 bg-slate-800 text-sm font-bold text-slate-300">لیست گفتگوها</div>
+                                <div id="admin-chat-users-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+                                    </div>
+                            </div>
+                            <div class="w-full md:w-2/3 flex flex-col bg-slate-950 relative">
+                                <div id="admin-chat-header" class="p-4 bg-slate-800 border-b border-slate-700/50 font-bold text-white hidden items-center gap-3">
+                                    <i class="fas fa-user-circle text-2xl text-primary"></i> <span id="admin-chat-active-name">کاربر</span>
+                                </div>
+                                <div id="admin-chat-empty" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500">
+                                    <i class="fas fa-comments text-5xl mb-3 opacity-20"></i>
+                                    <p>یک گفتگو را برای نمایش انتخاب کنید</p>
+                                </div>
+                                <div id="admin-chat-history" class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 hidden">
+                                    </div>
+                                <div id="admin-chat-input-area" class="p-3 bg-slate-900 border-t border-slate-700/50 hidden flex items-center gap-2">
+                                    <input type="text" id="admin-chat-input" placeholder="پاسخ خود را بنویسید..." class="flex-1 bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-white outline-none focus:border-secondary text-sm" onkeypress="if(event.key === 'Enter') adminSendMessage()">
+                                    <button onclick="adminSendMessage()" class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center hover:bg-fuchsia-500 transition shadow-lg shrink-0">
+                                        <i class="fas fa-paper-plane mr-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-users" class="admin-tab-content hidden space-y-6 fade-in">
+                        <h3 class="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">کاربران ثبت‌نام شده سایت</h3>
+                        <p class="text-slate-400 text-sm mb-4">در اینجا لیستی از تمام کسانی که در سایت شما اکانت ساخته‌اند (برای چت) را می‌بینید.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right bg-slate-900/50 rounded-xl overflow-hidden border border-slate-700/50">
+                                <thead class="bg-slate-800 text-slate-300">
+                                    <tr>
+                                        <th class="p-4 font-medium border-b border-slate-700">نام کاربری</th>
+                                        <th class="p-4 font-medium border-b border-slate-700">رمز عبور</th>
+                                        <th class="p-4 font-medium border-b border-slate-700">تعداد پیام‌ها</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-table" class="divide-y divide-slate-800/50 text-white">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="tab-settings" class="admin-tab-content hidden space-y-6 fade-in">
+                        <h3 class="text-2xl font-bold mb-6 text-white border-b border-slate-700/50 pb-4">تنظیمات اکانت مدیر (ادمین)</h3>
+                        <p class="text-slate-400 text-sm mb-4">از این بخش می‌توانید نام کاربری و رمز عبور ورود به پنل مدیریت را تغییر دهید. (پیش‌فرض admin / admin است)</p>
+                        <div class="max-w-md bg-slate-800/30 p-6 rounded-xl border border-slate-700/50 space-y-4 shadow-lg shadow-black/20">
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">نام کاربری جدید ادمین</label>
+                                <input type="text" id="admin-new-user" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-orange-500 transition" dir="ltr">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-slate-400 mb-2">رمز عبور جدید ادمین</label>
+                                <input type="text" id="admin-new-pass" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-orange-500 transition" dir="ltr">
+                            </div>
+                            <button onclick="changeAdminCredentials()" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold py-3 rounded-xl transition mt-2 shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2">
+                                <i class="fas fa-save"></i> ذخیره مشخصات جدید
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-slate-800 backdrop-blur-md text-white px-6 py-3 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-[200] opacity-0 flex items-center gap-3 border border-white/10 transition-all duration-300">
+        <i id="toast-icon" class="fas fa-check-circle text-green-400 text-xl"></i>
+        <span id="toast-msg" class="font-medium tracking-wide text-sm"></span>
+    </div>
+
+    <script>
+        // ==========================================
+        // STATE MANAGEMENT (In-Memory App Data)
+        // ==========================================
+        let state = {
+            profile: {
+                name: "سینا",
+                title: "توسعه‌دهنده خلاق وب و طراح پایگاه داده",
+                bio: "من عاشق خلق تجربه‌های کاربری مدرن، تعاملی و پرسرعت هستم. طراحی فرانت‌اند با React و Tailwind در کنار معماری دیتابیس‌های پیشرفته، تخصص اصلی منه.",
+                image: "https://placehold.co/400x400/1e293b/a5b4fc?text=Sina"
+            },
+            skills: [
+                { id: 1, name: "React.js & Web Design", percent: 90 },
+                { id: 2, name: "Tailwind CSS", percent: 95 },
+                { id: 3, name: "Database Architecture", percent: 85 },
+                { id: 4, name: "Bot & VPN Management", percent: 80 }
+            ],
+            projects: [
+                { id: 1, title: "مرورگر سیمو (Simo)", desc: "یک سیستم جستجوگر اختصاصی با نتایج هوشمند گوگل استایل.", img: "https://placehold.co/600x400/0f172a/8b5cf6?text=Simo+Browser", link: "#" },
+                { id: 2, title: "سامانه ثبت نام آسودگی", desc: "پورتال جامع مدیریت و ثبت نام مدارس با پنل پیشرفته.", img: "https://placehold.co/600x400/0f172a/ec4899?text=Asoudegi", link: "#" }
+            ],
+            gallery: [
+                { id: 1, img: "https://placehold.co/600x600/1e293b/38bdf8?text=Workspace", title: "محیط توسعه" },
+                { id: 2, img: "https://placehold.co/600x600/1e293b/a78bfa?text=Setup", title: "سیستم من" }
+            ],
+            socials: [
+                { id: 1, platform: "telegram", url: "https://t.me/filtersimovipbot" },
+                { id: 2, platform: "rubika", url: "#" },
+                { id: 3, platform: "eitaa", url: "#" }
+            ],
+            music: [
+                { id: 1, title: "موزیک لو-فای برنامه نویسی", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }
+            ],
+            users: [
+                { id: 'admin_id_001', username: 'admin', password: 'admin', role: 'admin' }
+            ],
+            currentUser: null, 
+            messages: []
+        };
+
+        let activeAdminChatUserId = null;
+
+        const platformDetails = {
+            telegram: { icon: 'fab fa-telegram', color: 'text-blue-400', bg: 'border-blue-500/30 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(96,165,250,0.4)]' },
+            instagram: { icon: 'fab fa-instagram', color: 'text-pink-500', bg: 'border-pink-500/30 hover:border-pink-400 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)]' },
+            whatsapp: { icon: 'fab fa-whatsapp', color: 'text-green-500', bg: 'border-green-500/30 hover:border-green-400 hover:shadow-[0_0_15px_rgba(34,197,94,0.4)]' },
+            linkedin: { icon: 'fab fa-linkedin', color: 'text-blue-600', bg: 'border-blue-600/30 hover:border-blue-500 hover:shadow-[0_0_15px_rgba(37,99,235,0.4)]' },
+            github: { icon: 'fab fa-github', color: 'text-white', bg: 'border-white/30 hover:border-white hover:shadow-[0_0_15px_rgba(255,255,255,0.4)]' },
+            twitter: { icon: 'fab fa-twitter', color: 'text-sky-400', bg: 'border-sky-500/30 hover:border-sky-400 hover:shadow-[0_0_15px_rgba(56,189,248,0.4)]' },
+            rubika: { icon: 'fas fa-comment-dots', color: 'text-purple-500', bg: 'border-purple-500/30 hover:border-purple-400 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]' },
+            bale: { icon: 'fas fa-comment-alt', color: 'text-green-400', bg: 'border-green-400/30 hover:border-green-300 hover:shadow-[0_0_15px_rgba(74,222,128,0.4)]' },
+            eitaa: { icon: 'fas fa-paper-plane', color: 'text-orange-500', bg: 'border-orange-500/30 hover:border-orange-400 hover:shadow-[0_0_15px_rgba(249,115,22,0.4)]' },
+            email: { icon: 'fas fa-envelope', color: 'text-red-400', bg: 'border-red-500/30 hover:border-red-400 hover:shadow-[0_0_15px_rgba(248,113,113,0.4)]' }
+        };
+
+        // ==========================================
+        // UTILITIES
+        // ==========================================
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-msg').innerText = msg;
+            
+            if(type === 'error') {
+                icon.className = 'fas fa-exclamation-circle text-red-500 text-xl';
+                t.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+            } else {
+                icon.className = 'fas fa-check-circle text-green-400 text-xl';
+                t.style.borderColor = 'rgba(74, 222, 128, 0.5)';
+            }
+
+            t.classList.remove('opacity-0', '-translate-y-10');
+            t.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                t.classList.remove('opacity-100', 'translate-y-0');
+                t.classList.add('opacity-0', '-translate-y-10');
+            }, 3000);
+        }
+
+        function generateId() { return Math.floor(Math.random() * 1000000).toString(); }
+        function getTime() { return new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }); }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // ==========================================
+        // AUTHENTICATION LOGIC
+        // ==========================================
+        function openAuthModal() {
+            const m = document.getElementById('auth-modal');
+            const b = document.getElementById('auth-box');
+            m.classList.remove('hidden');
+            setTimeout(() => {
+                m.classList.remove('opacity-0');
+                b.classList.remove('scale-95');
+            }, 10);
+            document.getElementById('auth-error').classList.add('hidden');
+        }
+
+        function closeAuthModal() {
+            const m = document.getElementById('auth-modal');
+            const b = document.getElementById('auth-box');
+            m.classList.add('opacity-0');
+            b.classList.add('scale-95');
+            setTimeout(() => { m.classList.add('hidden'); }, 300);
+        }
+
+        function toggleAuthMode(mode) {
+            document.getElementById('auth-error').classList.add('hidden');
+            const loginTab = document.getElementById('tab-login');
+            const regTab = document.getElementById('tab-register');
+            const loginForm = document.getElementById('form-login');
+            const regForm = document.getElementById('form-register');
+
+            if(mode === 'login') {
+                loginTab.className = "flex-1 text-center font-bold text-primary border-b-2 border-primary pb-2 transition-all";
+                regTab.className = "flex-1 text-center font-bold text-slate-400 border-b-2 border-transparent pb-2 hover:text-slate-200 transition-all";
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+            } else {
+                regTab.className = "flex-1 text-center font-bold text-secondary border-b-2 border-secondary pb-2 transition-all";
+                loginTab.className = "flex-1 text-center font-bold text-slate-400 border-b-2 border-transparent pb-2 hover:text-slate-200 transition-all";
+                regForm.classList.remove('hidden');
+                loginForm.classList.add('hidden');
+            }
+        }
+
+        function showAuthError(msg) {
+            const el = document.getElementById('auth-error');
+            el.innerText = msg;
+            el.classList.remove('hidden');
+        }
+
+        function handleLogin() {
+            const u = document.getElementById('log-username').value.trim();
+            const p = document.getElementById('log-password').value.trim();
+            if(!u || !p) return showAuthError('نام کاربری و رمز عبور الزامی است.');
+
+            const user = state.users.find(x => x.username === u && x.password === p);
+            if(user) {
+                state.currentUser = user;
+                closeAuthModal();
+                showToast(`خوش آمدید ${user.role === 'admin' ? 'مدیر' : user.username}`);
+                updateAll();
+                document.getElementById('log-username').value = '';
+                document.getElementById('log-password').value = '';
+                if(user.role !== 'admin') document.getElementById('user-chat-widget').classList.remove('hidden');
+            } else {
+                showAuthError('نام کاربری یا رمز عبور اشتباه است.');
+            }
+        }
+
+        function handleRegister() {
+            const u = document.getElementById('reg-username').value.trim();
+            const p = document.getElementById('reg-password').value.trim();
+            if(!u || !p) return showAuthError('وارد کردن نام کاربری و رمز عبور الزامی است.');
+            if(state.users.some(x => x.username === u)) return showAuthError('این نام کاربری قبلا گرفته شده.');
+
+            const newUser = { id: generateId(), username: u, password: p, role: 'user' };
+            state.users.push(newUser);
+            state.currentUser = newUser;
+            closeAuthModal();
+            showToast('حساب شما با موفقیت ساخته شد و وارد شدید!');
+            updateAll();
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-password').value = '';
+            document.getElementById('user-chat-widget').classList.remove('hidden');
+        }
+
+        function logout() {
+            state.currentUser = null;
+            document.getElementById('user-chat-widget').classList.add('hidden');
+            document.getElementById('user-chat-box').classList.add('hidden');
+            switchView('public');
+            updateAll();
+            showToast('با موفقیت خارج شدید');
+        }
+
+        // ==========================================
+        // CHAT LOGIC (USER SIDE)
+        // ==========================================
+        let chatOpen = false;
+        function toggleUserChat() {
+            if(!state.currentUser) {
+                openAuthModal();
+                return;
+            }
+            if(state.currentUser.role === 'admin') {
+                showToast('شما ادمین هستید. برای پیام‌ها به پنل مدیریت بروید.', 'error');
+                return;
+            }
+
+            const box = document.getElementById('user-chat-box');
+            chatOpen = !chatOpen;
+            if(chatOpen) {
+                box.classList.remove('hidden');
+                setTimeout(() => {
+                    box.classList.remove('opacity-0', 'scale-95');
+                }, 10);
+                document.getElementById('chat-header-img').src = state.profile.image;
+                renderUserChatMessages();
+            } else {
+                box.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => { box.classList.add('hidden'); }, 300);
+            }
+        }
+
+        function renderUserChatMessages() {
+            if(!state.currentUser) return;
+            const container = document.getElementById('user-chat-messages');
+            const myMsgs = state.messages.filter(m => m.userId === state.currentUser.id);
+            
+            if(myMsgs.length === 0) {
+                container.innerHTML = `<div class="text-center text-xs text-slate-500 my-auto">هیچ پیامی نیست. اولین نفری باشید که سلام می‌کند!</div>`;
+                return;
+            }
+
+            container.innerHTML = myMsgs.map(m => {
+                const isMe = m.sender === 'user';
+                return `
+                <div class="flex w-full ${isMe ? 'justify-end' : 'justify-start'}">
+                    <div class="max-w-[80%] p-3 text-sm text-white ${isMe ? 'chat-bubble-user' : 'chat-bubble-admin'} shadow-md">
+                        ${m.text}
+                        <div class="text-[10px] text-white/50 mt-1 text-right" dir="ltr">${m.time}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendUserMessage() {
+            const input = document.getElementById('user-chat-input');
+            const text = input.value.trim();
+            if(!text || !state.currentUser) return;
+
+            state.messages.push({
+                id: generateId(),
+                userId: state.currentUser.id,
+                sender: 'user',
+                text: text,
+                time: getTime()
+            });
+
+            input.value = '';
+            renderUserChatMessages();
+            if(document.getElementById('admin-view').classList.contains('hidden') === false) {
+                renderAdminChatData();
+                renderAdminChatHistory();
+            }
+        }
+
+        // ==========================================
+        // CHAT LOGIC (ADMIN SIDE)
+        // ==========================================
+        function getChatUsers() {
+            return state.users.filter(u => u.role !== 'admin');
+        }
+
+        function renderAdminChatData() {
+            const usersListContainer = document.getElementById('admin-chat-users-list');
+            const chatUsers = getChatUsers();
+            
+            document.getElementById('admin-msg-badge').innerText = chatUsers.length;
+
+            if(chatUsers.length === 0) {
+                usersListContainer.innerHTML = `<div class="text-center text-xs text-slate-500 p-4">هیچ کاربری ثبت‌نام نکرده است.</div>`;
+                return;
+            }
+
+            usersListContainer.innerHTML = chatUsers.map(u => {
+                const isActive = u.id === activeAdminChatUserId;
+                const userMsgs = state.messages.filter(m => m.userId === u.id);
+                const lastMsg = userMsgs.slice(-1)[0];
+                
+                return `
+                <div onclick="openAdminChatWith('${u.id}', '${u.username}')" class="p-3 rounded-lg cursor-pointer transition flex items-center gap-3 ${isActive ? 'bg-primary/20 border border-primary/50' : 'hover:bg-slate-800 border border-transparent'}">
+                    <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white"><i class="fas fa-user"></i></div>
+                    <div class="flex-1 overflow-hidden">
+                        <div class="text-sm font-bold text-white truncate">${u.username}</div>
+                        <div class="text-xs text-slate-400 truncate">${lastMsg ? lastMsg.text : 'پیامی ارسال نشده'}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openAdminChatWith(userId, username) {
+            activeAdminChatUserId = userId;
+            
+            document.getElementById('admin-chat-empty').classList.add('hidden');
+            document.getElementById('admin-chat-header').classList.remove('hidden');
+            document.getElementById('admin-chat-header').classList.add('flex');
+            document.getElementById('admin-chat-history').classList.remove('hidden');
+            document.getElementById('admin-chat-input-area').classList.remove('hidden');
+            document.getElementById('admin-chat-input-area').classList.add('flex');
+            
+            document.getElementById('admin-chat-active-name').innerText = username;
+            
+            renderAdminChatHistory();
+            renderAdminChatData(); 
+        }
+
+        function renderAdminChatHistory() {
+            const container = document.getElementById('admin-chat-history');
+            if (!activeAdminChatUserId) return;
+            
+            const currentMsgs = state.messages.filter(m => m.userId === activeAdminChatUserId);
+            
+            if(currentMsgs.length === 0) {
+                container.innerHTML = `<div class="text-center text-xs text-slate-500 my-auto">هنوز گفتگویی صورت نگرفته است. پاسخی بفرستید!</div>`;
+                return;
+            }
+            
+            container.innerHTML = currentMsgs.map(m => {
+                const isAdmin = m.sender === 'admin';
+                return `
+                <div class="flex w-full ${isAdmin ? 'justify-end' : 'justify-start'}">
+                    <div class="max-w-[80%] p-3 text-sm text-white ${isAdmin ? 'chat-bubble-user' : 'chat-bubble-admin'} shadow-md">
+                        ${m.text}
+                        <div class="text-[10px] text-white/50 mt-1 text-right" dir="ltr">${m.time}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function adminSendMessage() {
+            const input = document.getElementById('admin-chat-input');
+            const text = input.value.trim();
+            if(!text || !activeAdminChatUserId) return;
+
+            state.messages.push({
+                id: generateId(),
+                userId: activeAdminChatUserId,
+                sender: 'admin',
+                text: text,
+                time: getTime()
+            });
+
+            input.value = '';
+            renderAdminChatHistory();
+            renderAdminChatData();
+            if(chatOpen) renderUserChatMessages(); 
+        }
+
+        // ==========================================
+        // RENDER FUNCTIONS (Public View & UI Base)
+        // ==========================================
+        function renderNavbar() {
+            const actionsContainer = document.getElementById('nav-actions');
+            
+            if(!state.currentUser) {
+                actionsContainer.innerHTML = `
+                    <button onclick="openAuthModal()" class="bg-primary/20 hover:bg-primary/40 text-primary border border-primary/30 px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg backdrop-blur-sm">
+                        <i class="fas fa-sign-in-alt"></i> ورود / ثبت نام
+                    </button>`;
+            } else {
+                let adminBtn = state.currentUser.role === 'admin' ? 
+                    `<button onclick="switchView('admin')" class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-transform hover:scale-105 shadow-lg flex items-center gap-2"><i class="fas fa-cogs"></i> پنل مدیریت</button>` : '';
+                
+                actionsContainer.innerHTML = `
+                    <div class="text-sm font-medium text-slate-300 hidden sm:block">سلام، <span class="text-white font-bold">${state.currentUser.username}</span></div>
+                    ${adminBtn}
+                    <button onclick="logout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2"><i class="fas fa-sign-out-alt"></i> خروج</button>
+                `;
+            }
+
+            const chatWidget = document.getElementById('user-chat-widget');
+            if(state.currentUser && state.currentUser.role !== 'admin') {
+                chatWidget.classList.remove('hidden');
+                document.getElementById('chat-header-img').src = state.profile.image;
+            } else {
+                chatWidget.classList.add('hidden');
+                if(chatOpen) toggleUserChat();
+            }
+        }
+
+        function renderPublicUI() {
+            document.getElementById('render-profile-name').innerText = state.profile.name;
+            document.getElementById('render-profile-title').innerText = state.profile.title;
+            document.getElementById('render-profile-bio').innerText = state.profile.bio;
+            document.getElementById('render-profile-img').src = state.profile.image;
+
+            document.getElementById('render-skills').innerHTML = state.skills.map(skill => `
+                <div class="glass-panel p-6 rounded-2xl group hover:-translate-y-1 transition-transform duration-300">
+                    <div class="flex justify-between mb-3">
+                        <span class="font-bold text-lg text-white tracking-wide">${skill.name}</span>
+                        <span class="text-primary font-black drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]">${skill.percent}%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                        <div class="bg-gradient-to-l from-primary to-secondary h-full rounded-full transition-all duration-1000 relative" style="width: ${skill.percent}%">
+                            <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            const projectsContainer = document.getElementById('render-projects');
+            const projectsHtml = state.projects.length === 0 ? 
+                `<div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/20 rounded-2xl border border-slate-700/50">پروژه‌ای برای نمایش وجود ندارد.</div>` :
+                state.projects.map(proj => `
+                <div class="glass-panel rounded-2xl overflow-hidden group block hover:-translate-y-2 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(217,70,239,0.3)]">
+                    <div class="h-56 overflow-hidden relative cursor-pointer" onclick="openLightbox('${proj.img}')">
+                        <img src="${proj.img}" alt="${proj.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                            <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-white shadow-xl"><i class="fas fa-search-plus text-2xl"></i></div>
+                        </div>
+                    </div>
+                    <div class="p-6 relative">
+                        <h3 class="text-2xl font-bold text-white mb-3 tracking-tight">${proj.title}</h3>
+                        <p class="text-slate-400 text-sm line-clamp-2 mb-5 leading-relaxed">${proj.desc}</p>
+                        <a href="${proj.link}" target="_blank" class="inline-flex items-center gap-2 text-primary font-bold hover:text-secondary transition-colors group/link">
+                            مشاهده پروژه <i class="fas fa-arrow-left transform group-hover/link:-translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+            projectsContainer.innerHTML = projectsHtml;
+
+            const galleryContainer = document.getElementById('render-gallery');
+            const galleryHtml = state.gallery.length === 0 ? 
+                `<div class="col-span-full text-center text-slate-500 py-10 bg-slate-800/20 rounded-2xl border border-slate-700/50">گالری تصاویر خالی است.</div>` :
+                state.gallery.map(item => `
+                <div class="rounded-2xl overflow-hidden relative group aspect-[4/5] cursor-pointer shadow-lg" onclick="openLightbox('${item.img}')">
+                    <img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-5">
+                        <span class="text-white font-bold text-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">${item.title}</span>
+                    </div>
+                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                            <i class="fas fa-expand text-white text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            galleryContainer.innerHTML = galleryHtml;
+
+            const musicContainer = document.getElementById('render-music');
+            if(state.music.length === 0) {
+                musicContainer.innerHTML = `<p class="text-slate-500 text-center text-lg italic">لیست پخش خالی است.</p>`;
+            } else {
+                musicContainer.innerHTML = state.music.map(m => `
+                    <div class="glass-panel p-5 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-5 transition-transform hover:-translate-y-1 hover:border-secondary/50">
+                        <div class="flex items-center gap-5 w-full md:w-auto">
+                            <div class="w-16 h-16 shrink-0 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white shadow-[0_0_20px_rgba(217,70,239,0.4)] relative overflow-hidden group">
+                                <div class="absolute inset-0 bg-white/20 group-hover:scale-150 transition-transform duration-500 rounded-full opacity-0 group-hover:opacity-100"></div>
+                                <i class="fas fa-play text-xl ml-1 relative z-10"></i>
+                            </div>
+                            <span class="text-white font-bold text-lg md:text-xl truncate max-w-[200px] sm:max-w-xs tracking-wide">${m.title}</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto flex-1 md:justify-end">
+                            <audio controls src="${m.url}" class="h-10 w-full md:w-64 lg:w-80 outline-none filter drop-shadow-lg opacity-80 hover:opacity-100 transition-opacity"></audio>
+                            <a href="${m.url}" download="${m.title}" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2.5 rounded-full transition flex items-center justify-center gap-2 shrink-0 border border-slate-600 font-medium w-full sm:w-auto">
+                                <i class="fas fa-cloud-download-alt text-primary"></i> دانلود
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('render-socials').innerHTML = state.socials.map(soc => {
+                const pd = platformDetails[soc.platform] || { icon: 'fas fa-link', color: 'text-white', bg: 'border-white/20 hover:border-white' };
+                const platformNames = { telegram: 'تلگرام', instagram: 'اینستاگرام', whatsapp: 'واتس‌اپ', linkedin: 'لینکدین', github: 'گیت‌هاب', twitter: 'توییتر', rubika: 'روبیکا', bale: 'بله', eitaa: 'ایتا', email: 'ایمیل' };
+                return `
+                <a href="${soc.url}" target="_blank" class="flex items-center gap-3 px-6 py-3 rounded-full border bg-slate-900/50 backdrop-blur-sm ${pd.bg} transition-all duration-300 hover:-translate-y-1">
+                    <i class="${pd.icon} ${pd.color} text-2xl drop-shadow-md"></i>
+                    <span class="text-white font-medium capitalize tracking-wide hidden sm:inline">${platformNames[soc.platform] || soc.platform}</span>
+                </a>
+                `;
+            }).join('');
+        }
+
+        // ==========================================
+        // RENDER FUNCTIONS (Admin Lists)
+        // ==========================================
+        function renderAdminLists() {
+            document.getElementById('inp-name').value = state.profile.name;
+            document.getElementById('inp-title').value = state.profile.title;
+            document.getElementById('inp-bio').value = state.profile.bio;
+
+            const adminUserObj = state.users.find(u => u.role === 'admin');
+            if(adminUserObj) {
+                document.getElementById('admin-new-user').value = adminUserObj.username;
+                document.getElementById('admin-new-pass').value = adminUserObj.password;
+            }
+
+            document.getElementById('admin-skills-list').innerHTML = state.skills.map(s => `
+                <div class="flex items-center justify-between bg-slate-800/80 p-4 rounded-xl border border-slate-700 shadow-inner">
+                    <div>
+                        <span class="text-white font-bold block">${s.name}</span>
+                        <span class="text-primary text-xs font-black">${s.percent}%</span>
+                    </div>
+                    <button onclick="deleteItem('skills', ${s.id})" class="w-8 h-8 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fas fa-trash"></i></button>
+                </div>
+            `).join('');
+
+            document.getElementById('admin-projects-list').innerHTML = state.projects.map(p => `
+                <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 flex gap-4 shadow-inner">
+                    <img src="${p.img}" class="w-20 h-20 object-cover rounded-lg">
+                    <div class="flex-1 flex flex-col justify-between overflow-hidden">
+                        <div>
+                            <div class="text-white font-bold text-sm truncate">${p.title}</div>
+                            <div class="text-slate-400 text-xs truncate mt-1">${p.link}</div>
+                        </div>
+                        <button onclick="deleteItem('projects', ${p.id})" class="self-end text-red-400 hover:text-red-300 text-xs bg-red-500/10 px-3 py-1 rounded-md transition"><i class="fas fa-trash ml-1"></i>حذف</button>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('admin-gallery-list').innerHTML = state.gallery.map(g => `
+                <div class="relative rounded-xl overflow-hidden group aspect-square shadow-inner">
+                    <img src="${g.img}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span class="text-white text-xs mb-3 text-center px-2 font-bold">${g.title}</span>
+                        <button onclick="deleteItem('gallery', ${g.id})" class="bg-red-500 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('admin-music-list').innerHTML = state.music.map(m => `
+                <div class="flex items-center justify-between bg-slate-800/80 p-4 rounded-xl border border-slate-700 shadow-inner">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0"><i class="fas fa-music"></i></div>
+                        <span class="text-white text-sm font-bold truncate">${m.title}</span>
+                    </div>
+                    <button onclick="deleteItem('music', ${m.id})" class="text-red-400 hover:text-red-300 bg-red-500/10 w-8 h-8 rounded-full flex items-center justify-center transition shrink-0"><i class="fas fa-trash"></i></button>
+                </div>
+            `).join('');
+
+            document.getElementById('admin-socials-list').innerHTML = state.socials.map(s => {
+                const pd = platformDetails[s.platform] || { icon: 'fas fa-link', color: 'text-white' };
+                return `
+                <div class="flex items-center justify-between bg-slate-800/80 p-4 rounded-xl border border-slate-700 shadow-inner">
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center ${pd.color} text-xl shrink-0 border border-slate-700"><i class="${pd.icon}"></i></div>
+                        <span class="text-slate-300 text-xs truncate w-32" dir="ltr">${s.url}</span>
+                    </div>
+                    <button onclick="deleteItem('socials', ${s.id})" class="text-red-400 hover:text-red-300 bg-red-500/10 w-8 h-8 rounded-full flex items-center justify-center transition shrink-0"><i class="fas fa-trash"></i></button>
+                </div>
+            `}).join('');
+
+            const registeredUsers = state.users.filter(u => u.role !== 'admin');
+            document.getElementById('admin-users-table').innerHTML = registeredUsers.map(u => {
+                const msgCount = state.messages.filter(m => m.userId === u.id).length;
+                return `
+                <tr class="hover:bg-slate-800/50 transition">
+                    <td class="p-4 border-b border-slate-800 font-bold">${u.username}</td>
+                    <td class="p-4 border-b border-slate-800 font-mono text-slate-400 tracking-wider">${u.password}</td>
+                    <td class="p-4 border-b border-slate-800">
+                        <span class="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold">${msgCount} پیام</span>
+                    </td>
+                </tr>
+            `}).join('');
+
+            renderAdminChatData();
+        }
+
+        // ==========================================
+        // ADMIN ACTIONS
+        // ==========================================
+        async function saveProfile() {
+            state.profile.name = document.getElementById('inp-name').value;
+            state.profile.title = document.getElementById('inp-title').value;
+            state.profile.bio = document.getElementById('inp-bio').value;
+            
+            const fileInput = document.getElementById('inp-image');
+            if(fileInput.files.length > 0) {
+                state.profile.image = await fileToBase64(fileInput.files[0]);
+            }
+            updateAll(); showToast('اطلاعات پروفایل با موفقیت بروز شد');
+        }
+
+        function addSkill() {
+            const n = document.getElementById('skill-name').value.trim();
+            const p = document.getElementById('skill-percent').value;
+            if(!n || !p) return showToast('نام و درصد مهارت را وارد کنید', 'error');
+            state.skills.push({ id: generateId(), name: n, percent: parseInt(p) });
+            document.getElementById('skill-name').value = ''; document.getElementById('skill-percent').value = '';
+            updateAll(); showToast('مهارت اضافه شد');
+        }
+
+        async function addProject() {
+            const t = document.getElementById('proj-title').value.trim();
+            const d = document.getElementById('proj-desc').value.trim();
+            const l = document.getElementById('proj-link').value.trim();
+            const fileInput = document.getElementById('proj-img');
+            
+            if(!t || fileInput.files.length === 0) return showToast('عنوان و عکس پروژه الزامی است', 'error');
+            
+            const imgBase64 = await fileToBase64(fileInput.files[0]);
+            state.projects.push({ id: generateId(), title: t, desc: d, img: imgBase64, link: l || '#' });
+            
+            ['proj-title', 'proj-desc', 'proj-link', 'proj-img'].forEach(id => document.getElementById(id).value = '');
+            updateAll(); showToast('پروژه با موفقیت ثبت شد');
+        }
+
+        async function addGallery() {
+            const t = document.getElementById('gal-title').value.trim();
+            const fileInput = document.getElementById('gal-img');
+            
+            if(fileInput.files.length === 0) return showToast('یک عکس انتخاب کنید', 'error');
+            
+            const imgBase64 = await fileToBase64(fileInput.files[0]);
+            state.gallery.push({ id: generateId(), img: imgBase64, title: t || 'بدون عنوان' });
+            
+            document.getElementById('gal-img').value = ''; document.getElementById('gal-title').value = '';
+            updateAll(); showToast('عکس به گالری اضافه شد');
+        }
+
+        function addSocial() {
+            const p = document.getElementById('soc-platform').value;
+            const l = document.getElementById('soc-link').value.trim();
+            if(!l) return showToast('لینک را وارد کنید', 'error');
+            state.socials.push({ id: generateId(), platform: p, url: l });
+            document.getElementById('soc-link').value = '';
+            updateAll(); showToast('راه ارتباطی اضافه شد');
+        }
+
+        async function addMusic() {
+            const t = document.getElementById('mus-title').value.trim();
+            const fileInput = document.getElementById('mus-file');
+            
+            if(!t || fileInput.files.length === 0) return showToast('نام آهنگ و فایل صوتی الزامی است', 'error');
+            
+            const audioBase64 = await fileToBase64(fileInput.files[0]);
+            state.music.push({ id: generateId(), title: t, url: audioBase64 });
+            
+            document.getElementById('mus-title').value = ''; document.getElementById('mus-file').value = '';
+            updateAll(); showToast('آهنگ اضافه شد');
+        }
+
+        function changeAdminCredentials() {
+            const newU = document.getElementById('admin-new-user').value.trim();
+            const newP = document.getElementById('admin-new-pass').value.trim();
+            if(!newU || !newP) return showToast('فیلدها نباید خالی باشند', 'error');
+            
+            const admin = state.users.find(u => u.role === 'admin');
+            if(admin) {
+                admin.username = newU;
+                admin.password = newP;
+                showToast('مشخصات ورود ادمین با موفقیت تغییر کرد');
+                renderNavbar(); 
+            }
+        }
+
+        function deleteItem(type, id) {
+            state[type] = state[type].filter(item => item.id !== id);
+            updateAll(); showToast('آیتم حذف شد');
+        }
+
+        function updateAll() {
+            renderNavbar();
+            renderPublicUI();
+            if(state.currentUser && state.currentUser.role === 'admin') {
+                renderAdminLists();
+            }
+        }
+
+        // ==========================================
+        // UI TOGGLES (Lightbox & Tabs)
+        // ==========================================
+        function openLightbox(imgSrc) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = imgSrc;
+            lightbox.classList.remove('hidden');
+            setTimeout(() => {
+                lightbox.classList.remove('opacity-0');
+                lightboxImg.classList.remove('scale-95');
+                lightboxImg.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightbox.classList.add('opacity-0');
+            lightboxImg.classList.remove('scale-100');
+            lightboxImg.classList.add('scale-95');
+            setTimeout(() => { lightbox.classList.add('hidden'); lightboxImg.src = ''; }, 300);
+        }
+
+        function switchView(view) {
+            const pub = document.getElementById('public-view');
+            const adm = document.getElementById('admin-view');
+            
+            if(view === 'admin') {
+                if(!state.currentUser || state.currentUser.role !== 'admin') {
+                    return showToast('شما دسترسی به این بخش ندارید', 'error');
+                }
+                pub.classList.add('hidden');
+                adm.classList.remove('hidden');
+                document.getElementById('user-chat-widget').classList.add('hidden');
+            } else {
+                adm.classList.add('hidden');
+                pub.classList.remove('hidden');
+                if(state.currentUser && state.currentUser.role !== 'admin') {
+                    document.getElementById('user-chat-widget').classList.remove('hidden');
+                }
+            }
+            window.scrollTo(0,0);
+        }
+
+        function openTab(tabId) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab-btn').forEach(el => {
+                el.classList.remove('bg-primary/20', 'text-white', 'border-primary/30');
+                el.classList.add('hover:bg-slate-800/50', 'text-slate-300', 'border-transparent');
+                el.querySelector('i').classList.remove('text-primary');
+            });
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            const activeBtn = event.currentTarget;
+            activeBtn.classList.add('bg-primary/20', 'text-white', 'border-primary/30');
+            activeBtn.classList.remove('hover:bg-slate-800/50', 'text-slate-300', 'border-transparent');
+            
+            if(tabId === 'tab-messages') renderAdminChatData();
+        }
+
+        // Initialize App
+        window.onload = () => {
+            updateAll();
+        };
+    </script>
+</body>
+</html>
